@@ -1,0 +1,6 @@
+{
+    "env": {
+        "ANTHROPIC_BASE_URL": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
+        "ANTHROPIC_MODEL": "qwen3.5-plus"
+    }
+}

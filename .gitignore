@@ -1,0 +1,21 @@
+# Environment variables / secrets
+.env
+# .env.*
+
+# Private keys & certificates
+*.pem
+*.key
+
+# Credential files (safety net – these should never be copied here)
+credentials*
+auth.json
+.credentials.json
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/

@@ -1,0 +1,33 @@
+# ── LLM API clients ──────────────────────────────────────────────────────────
+openai
+anthropic
+
+# ── Agent frameworks ─────────────────────────────────────────────────────────
+langchain
+langchain-openai
+langchain-anthropic
+langgraph
+openai-agents
+opencode-agent-sdk
+
+# ── HTTP / async ─────────────────────────────────────────────────────────────
+httpx
+aiohttp
+
+# ── Data validation & config ─────────────────────────────────────────────────
+pydantic
+python-dotenv
+
+# ── Terminal & output ────────────────────────────────────────────────────────
+rich
+
+# ── Tokenization ─────────────────────────────────────────────────────────────
+tiktoken
+
+# ── Data processing ──────────────────────────────────────────────────────────
+numpy
+pandas
+
+# ── Interactive development ──────────────────────────────────────────────────
+jupyter
+ipython

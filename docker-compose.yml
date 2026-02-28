@@ -1,0 +1,31 @@
+services:
+  dev:
+    build: .
+    image: python-ai-dev:3.12
+    ports:
+      - "22255:22"
+    volumes:
+      # workspace
+      - ~/projects:/workspace
+
+      # SSH public key (mounted as template, entrypoint copies with correct ownership)
+      - ${SSH_AUTHORIZED_KEYS:-/home/ubuntu/.ssh/authorized_keys}:/tmp/authorized_keys:ro
+
+      # root .profile: SSH login starts in /workspace
+      - ./dotfiles/root-profile:/root/.profile:ro
+
+      # AI tool config templates (from repo, read-only)
+      - ./dotfiles/claudeCode/.claude/settings.json:/tmp/claude-settings.json:ro
+      - ./dotfiles/claudeCode/.claude.json:/tmp/claude.json:ro
+      - ./dotfiles/codex/.codex/config.toml:/tmp/codex-config.toml:ro
+      - ./dotfiles/opencode/opencode.json:/tmp/opencode.json:ro
+
+      # Entrypoint script
+      - ./entrypoint.sh:/entrypoint.sh:ro
+
+    environment:
+      - BAILIAN_API_KEY
+
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    working_dir: /workspace
+    restart: unless-stopped
