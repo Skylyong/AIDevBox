@@ -23,8 +23,19 @@ services:
       # Entrypoint script
       - ./entrypoint.sh:/entrypoint.sh:ro
 
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
     environment:
       - BAILIAN_API_KEY
+      - HTTP_PROXY=http://host.docker.internal:${PROXY_PORT:-7890}
+      - HTTPS_PROXY=http://host.docker.internal:${PROXY_PORT:-7890}
+      - ALL_PROXY=socks5://host.docker.internal:${PROXY_PORT:-7890}
+      - NO_PROXY=localhost,127.0.0.1,host.docker.internal
+      - http_proxy=http://host.docker.internal:${PROXY_PORT:-7890}
+      - https_proxy=http://host.docker.internal:${PROXY_PORT:-7890}
+      - all_proxy=socks5://host.docker.internal:${PROXY_PORT:-7890}
+      - no_proxy=localhost,127.0.0.1,host.docker.internal
 
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
     working_dir: /workspace

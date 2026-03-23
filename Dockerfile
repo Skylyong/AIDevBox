@@ -55,7 +55,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && npm install -g npm@latest
 
 # ── uv – fast Python package manager ─────────────────────────────────────────
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && ln -s /root/.local/bin/uv /usr/local/bin/uv \
+    && ln -s /root/.local/bin/uvx /usr/local/bin/uvx
 ENV PATH="/root/.local/bin:${PATH}"
 
 # ── pipx ──────────────────────────────────────────────────────────────────────
@@ -70,15 +72,21 @@ RUN uv pip install --system -r /tmp/requirements.txt \
 # ── AI coding CLI tools ──────────────────────────────────────────────────────
 RUN npm install -g @anthropic-ai/claude-code opencode-ai @openai/codex@0.80.0
 
+# ── Users ─────────────────────────────────────────────────────────────────────
+RUN echo 'root:root@123' | chpasswd \
+    && useradd -m -s /bin/bash dev \
+    && echo 'dev:dev@123' | chpasswd
+
 # ── SSH server ─────────────────────────────────────────────────────────────────
-RUN mkdir -p /run/sshd /root/.ssh \
-    && chmod 700 /root/.ssh \
+RUN mkdir -p /run/sshd /root/.ssh /home/dev/.ssh \
+    && chmod 700 /root/.ssh /home/dev/.ssh \
+    && chown dev:dev /home/dev/.ssh \
     && sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config \
     && sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 EXPOSE 22
 
 # ── Workspace ─────────────────────────────────────────────────────────────────
-RUN mkdir -p /workspace
+RUN mkdir -p /workspace && chown dev:dev /workspace
 WORKDIR /workspace
 
 CMD ["bash"]

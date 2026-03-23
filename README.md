@@ -22,7 +22,8 @@ cp .env.example .env
 
 | 变量 | 说明 |
 |------|------|
-| `BAILIAN_API_KEY` | 百炼 Coding Plan API Key，三大 AI 开发z工具共用。获取地址：[百炼控制台](https://bailian.console.aliyun.com/cn-beijing/?tab=model#/efm/coding_plan) |
+| `BAILIAN_API_KEY` | 百炼 Coding Plan API Key，三大 AI 开发工具共用。获取地址：[百炼控制台](https://bailian.console.aliyun.com/cn-beijing/?tab=model#/efm/coding_plan) |
+| `PROXY_PORT` | 宿主机代理端口，容器内通过 `host.docker.internal` 转发。Clash 默认 `7890`，V2Ray 默认 `10808`，ClashVerge 默认 `7897`。未设置时默认 `7890` |
 | `SSH_AUTHORIZED_KEYS` | 宿主机 `authorized_keys` 文件路径，挂载到容器内用于 SSH 免密登录。默认 `/home/ubuntu/.ssh/authorized_keys`；若公钥在其他路径，可修改此变量 |
 
 `.env` 文件已在 `.gitignore` 中，不会被提交到 Git。
@@ -38,7 +39,8 @@ docker compose up -d
 **方式一：docker exec（宿主机本地）**
 
 ```bash
-docker compose exec dev bash
+docker compose exec -u dev dev bash   # 以 dev 用户进入（推荐）
+docker compose exec dev bash           # 以 root 用户进入
 ```
 
 **方式二：SSH（支持远程访问）**
@@ -46,25 +48,36 @@ docker compose exec dev bash
 容器将宿主机的 `~/.ssh/authorized_keys` 挂载到容器内，支持免密 SSH 登录：
 
 ```bash
-ssh -p 22255 root@localhost          # 从宿主机本地
-ssh -p 22255 root@<宿主机IP>         # 从远程机器
+ssh -p 22255 dev@localhost            # 以 dev 用户登录（推荐）
+ssh -p 22255 root@localhost           # 以 root 用户登录
+ssh -p 22255 dev@<宿主机IP>           # 从远程机器
 ```
 
 > 前提：宿主机 `~/.ssh/authorized_keys` 中包含你的公钥。
 
 进入容器后即可直接使用 `claude`、`opencode`、`codex` 命令，所有配置已通过仓库内的配置文件和环境变量自动注入，**无需手动登录或配置**。
 
+### 用户与权限
+
+| 用户 | 默认密码 | 说明 |
+|------|---------|------|
+| `dev` | `dev@123` | 普通用户，`/workspace` 目录所有者，日常开发推荐使用 |
+| `root` | `root@123` | 管理员，用于安装系统级软件 |
+
+- **日常开发**：以 `dev` 用户操作，适合 Claude Code 的 `--dangerously-skip-permissions` 模式
+- **安装软件**：在 dev shell 中执行 `su -` 输入 `root@123` 切换到 root
+
 ## 配置文件映射
 
 所有 AI CLI 的配置文件存放在仓库的 `dotfiles/` 目录中，作为只读模板挂载到容器的 `/tmp/`，由 `entrypoint.sh` 在启动时复制到正确位置并注入 API Key：
 
-| 工具 | 仓库模板 | 容器最终路径 | 说明 |
-|------|---------|------------|------|
-| Claude Code | `dotfiles/claudeCode/.claude/settings.json` | `/root/.claude/settings.json` | 注入 `ANTHROPIC_AUTH_TOKEN` 到 env 块 |
-| Claude Code | `dotfiles/claudeCode/.claude.json` | `/root/.claude.json` | 跳过 onboarding |
-| Codex | `dotfiles/codex/.codex/config.toml` | `/root/.codex/config.toml` | 通过 `env_key` 读取 `OPENAI_API_KEY` 环境变量 |
-| OpenCode | `dotfiles/opencode/opencode.json` | `/root/.config/opencode/opencode.json` | 替换 `YOUR_API_KEY` 占位符为实际 Key |
-| 工作区 | `~/projects/` | `/workspace/` | 你的项目文件 |
+| 工具 | 仓库模板 | 容器最终路径（root / dev） | 说明 |
+|------|---------|--------------------------|------|
+| Claude Code | `dotfiles/claudeCode/.claude/settings.json` | `/root/.claude/settings.json`、`/home/dev/.claude/settings.json` | 注入 `ANTHROPIC_AUTH_TOKEN` 到 env 块 |
+| Claude Code | `dotfiles/claudeCode/.claude.json` | `/root/.claude.json`、`/home/dev/.claude.json` | 跳过 onboarding |
+| Codex | `dotfiles/codex/.codex/config.toml` | `/root/.codex/config.toml`、`/home/dev/.codex/config.toml` | 通过 `env_key` 读取 `OPENAI_API_KEY` 环境变量 |
+| OpenCode | `dotfiles/opencode/opencode.json` | `/root/.config/opencode/opencode.json`、`/home/dev/.config/opencode/opencode.json` | 替换 `YOUR_API_KEY` 占位符为实际 Key |
+| 工作区 | `~/projects/` | `/workspace/`（所有者为 dev） | 你的项目文件 |
 
 ### API Key 注入机制
 
@@ -169,10 +182,10 @@ git clone <your-repo-url> my-dev-env && cd my-dev-env
 docker compose build
 cp .env.example .env    # 编辑 .env 填入 API Key
 docker compose up -d
-docker compose exec dev bash
+docker compose exec -u dev dev bash
 ```
 
-进入容器后所有 AI CLI 即可直接使用，无需额外登录或配置。
+以 `dev` 用户进入容器后，所有 AI CLI 即可直接使用，无需额外登录或配置。
 
 ## 自定义
 
