@@ -1,7 +1,7 @@
 {
     "env": {
 
-        "ANTHROPIC_BASE_URL": "http://154.9.235.31:3000",
+        "ANTHROPIC_BASE_URL": "https://www.packyapi.com",
         "ANTHROPIC_MODEL": "claude-opus-4-6" },
 
      "_comment": {
