@@ -57,7 +57,17 @@ if [ -f /tmp/opencode.json ]; then
 fi
 
 # ── Proxy (persist into shell profiles for SSH sessions) ─────────────────────
-if [ -n "$HTTP_PROXY" ]; then
+# Normalize upper/lower-case proxy vars so common CLIs see the same values.
+[ -n "$HTTP_PROXY" ]  && [ -z "$http_proxy" ]  && http_proxy="$HTTP_PROXY"
+[ -n "$HTTPS_PROXY" ] && [ -z "$https_proxy" ] && https_proxy="$HTTPS_PROXY"
+[ -n "$ALL_PROXY" ]   && [ -z "$all_proxy" ]   && all_proxy="$ALL_PROXY"
+[ -n "$NO_PROXY" ]    && [ -z "$no_proxy" ]    && no_proxy="$NO_PROXY"
+[ -n "$http_proxy" ]  && [ -z "$HTTP_PROXY" ]  && HTTP_PROXY="$http_proxy"
+[ -n "$https_proxy" ] && [ -z "$HTTPS_PROXY" ] && HTTPS_PROXY="$https_proxy"
+[ -n "$all_proxy" ]   && [ -z "$ALL_PROXY" ]   && ALL_PROXY="$all_proxy"
+[ -n "$no_proxy" ]    && [ -z "$NO_PROXY" ]    && NO_PROXY="$no_proxy"
+
+if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ] || [ -n "$ALL_PROXY" ]; then
     cat > /etc/profile.d/proxy.sh <<PROXYEOF
 export HTTP_PROXY="${HTTP_PROXY}"
 export HTTPS_PROXY="${HTTPS_PROXY}"

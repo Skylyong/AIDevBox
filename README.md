@@ -24,10 +24,12 @@ cp .env.example .env
 |------|------|
 | `BAILIAN_API_KEY` | 百炼 Coding Plan API Key，供 Claude Code 和 OpenCode 使用。获取地址：[百炼控制台](https://bailian.console.aliyun.com/cn-beijing/?tab=model#/efm/coding_plan) |
 | `OPENAI_API_KEY` | OpenAI 兼容 API Key，供 Codex 使用，会作为容器环境变量透传 |
-| `PROXY_PORT` | 宿主机代理端口，容器内通过 `host.docker.internal` 转发。Clash 默认 `7890`，V2Ray 默认 `10808`，ClashVerge 默认 `7897`。未设置时默认 `7890` |
-| `SSH_AUTHORIZED_KEYS` | 宿主机 SSH 公钥文件路径，挂载到容器内用于 SSH 免密登录。默认 `~/.ssh/id_ed25519.pub`；如使用 RSA 密钥，改为 `~/.ssh/id_rsa.pub` |
+| `HTTP_PROXY` / `HTTPS_PROXY` / `ALL_PROXY` | 可选代理配置。只有在宿主机确实开了代理时才填写，例如 `http://host.docker.internal:7890` 或 `socks5://host.docker.internal:7890`；留空则容器直连 |
+| `SSH_AUTHORIZED_KEYS` | 宿主机 **公钥文件**（`.pub`）的**绝对路径**，挂载为容器内 `authorized_keys`。不要用 `~`（Docker 不展开）；不要用 DSA（`id_dsa.pub`，新版 sshd 默认拒绝）。推荐 `ed25519` 或 `id_rsa.pub` |
 
 `.env` 文件已在 `.gitignore` 中，不会被提交到 Git。
+
+如果宿主机没有启动代理，请保持这些代理变量为空；否则容器里的 `curl`、`git`、Python HTTP 客户端等都会尝试通过该代理访问外网。
 
 ### 3. 启动开发环境
 
@@ -54,7 +56,7 @@ ssh -p 22255 root@localhost           # 以 root 用户登录
 ssh -p 22255 dev@<宿主机IP>           # 从远程机器
 ```
 
-> 前提：`.env` 中的 `SSH_AUTHORIZED_KEYS` 指向你的 SSH 公钥文件（`~/.ssh/id_ed25519.pub` 或 `~/.ssh/id_rsa.pub`）。
+> 前提：`.env` 中 `SSH_AUTHORIZED_KEYS` 为公钥文件的**绝对路径**（例如 `/Users/你的用户名/.ssh/id_ed25519.pub`），且算法为 ed25519 或 RSA。
 
 进入容器后即可直接使用 `claude`、`opencode`、`codex` 命令，所有配置已通过仓库内的配置文件和环境变量自动注入，**无需手动登录或配置**。
 

@@ -29,14 +29,15 @@ services:
       - "host.docker.internal:host-gateway"
 
     environment:
-      - HTTP_PROXY=http://host.docker.internal:${PROXY_PORT:-7890}
-      - HTTPS_PROXY=http://host.docker.internal:${PROXY_PORT:-7890}
-      - ALL_PROXY=socks5://host.docker.internal:${PROXY_PORT:-7890}
-      - NO_PROXY=localhost,127.0.0.1,host.docker.internal
-      - http_proxy=http://host.docker.internal:${PROXY_PORT:-7890}
-      - https_proxy=http://host.docker.internal:${PROXY_PORT:-7890}
-      - all_proxy=socks5://host.docker.internal:${PROXY_PORT:-7890}
-      - no_proxy=localhost,127.0.0.1,host.docker.internal
+      # Proxy is opt-in. Leave these empty for direct networking.
+      - HTTP_PROXY=${HTTP_PROXY:-}
+      - HTTPS_PROXY=${HTTPS_PROXY:-}
+      - ALL_PROXY=${ALL_PROXY:-}
+      - NO_PROXY=${NO_PROXY:-localhost,127.0.0.1,host.docker.internal}
+      - http_proxy=${http_proxy:-}
+      - https_proxy=${https_proxy:-}
+      - all_proxy=${all_proxy:-}
+      - no_proxy=${no_proxy:-localhost,127.0.0.1,host.docker.internal}
 
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
     working_dir: /workspace
