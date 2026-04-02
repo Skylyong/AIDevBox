@@ -1,6 +1,11 @@
 {
     "env": {
-        "ANTHROPIC_BASE_URL": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
-        "ANTHROPIC_MODEL": "qwen3.5-plus"
+
+        "ANTHROPIC_BASE_URL": "http://154.9.235.31:3000",
+        "ANTHROPIC_MODEL": "claude-opus-4-6" },
+
+     "_comment": {
+         "ANTHROPIC_BASE_URL": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
+         "ANTHROPIC_MODEL": "qwen3.5-plus"
     }
 }

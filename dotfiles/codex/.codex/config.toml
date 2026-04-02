@@ -1,7 +1,7 @@
 model_provider = "Model_Studio_Coding_Plan"
-model = "qwen3.5-plus"
+model = "gpt-5.2-codex"
 [model_providers.Model_Studio_Coding_Plan]
 name = "Model_Studio_Coding_Plan"
-base_url = "https://coding.dashscope.aliyuncs.com/v1"
+base_url = "http://154.9.235.31:3000/v1"
 env_key = "OPENAI_API_KEY"
-wire_api = "chat"
+wire_api = "responses"

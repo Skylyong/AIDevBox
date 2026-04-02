@@ -17,12 +17,13 @@ docker compose build
 
 ```bash
 cp .env.example .env
-# 编辑 .env，将 sk-your-key-here 替换为实际的 API Key
+# 编辑 .env，填入实际的 API Key
 ```
 
 | 变量 | 说明 |
 |------|------|
-| `BAILIAN_API_KEY` | 百炼 Coding Plan API Key，三大 AI 开发工具共用。获取地址：[百炼控制台](https://bailian.console.aliyun.com/cn-beijing/?tab=model#/efm/coding_plan) |
+| `BAILIAN_API_KEY` | 百炼 Coding Plan API Key，供 Claude Code 和 OpenCode 使用。获取地址：[百炼控制台](https://bailian.console.aliyun.com/cn-beijing/?tab=model#/efm/coding_plan) |
+| `OPENAI_API_KEY` | OpenAI 兼容 API Key，供 Codex 使用，会作为容器环境变量透传 |
 | `PROXY_PORT` | 宿主机代理端口，容器内通过 `host.docker.internal` 转发。Clash 默认 `7890`，V2Ray 默认 `10808`，ClashVerge 默认 `7897`。未设置时默认 `7890` |
 | `SSH_AUTHORIZED_KEYS` | 宿主机 SSH 公钥文件路径，挂载到容器内用于 SSH 免密登录。默认 `~/.ssh/id_ed25519.pub`；如使用 RSA 密钥，改为 `~/.ssh/id_rsa.pub` |
 
@@ -81,13 +82,13 @@ ssh -p 22255 dev@<宿主机IP>           # 从远程机器
 
 ### API Key 注入机制
 
-三大工具共用一个百炼 Coding Plan API Key，通过 `.env` 文件中的 `BAILIAN_API_KEY` 传入。`entrypoint.sh` 在容器启动时统一处理注入：
+`.env` 中的 `BAILIAN_API_KEY` 和 `OPENAI_API_KEY` 都会传入容器，并由 `entrypoint.sh` 在容器启动时统一处理：
 
 | 工具 | 注入方式 |
 |------|---------|
 | Claude Code | `jq` 将 `BAILIAN_API_KEY` 写入 `settings.json` 的 `env.ANTHROPIC_AUTH_TOKEN` 字段 |
-| Codex | `export OPENAI_API_KEY`，config.toml 通过 `env_key` 引用该环境变量 |
-| OpenCode | `sed` 将配置模板中的 `YOUR_API_KEY` 占位符替换为实际 Key |
+| Codex | `config.toml` 直接通过 `env_key` 引用 `OPENAI_API_KEY` |
+| OpenCode | `sed` 将配置模板中的 `YOUR_API_KEY` 占位符替换为 `BAILIAN_API_KEY` |
 
 如需修改映射路径或配置，编辑 `docker-compose.yml` 和 `dotfiles/` 下的对应文件即可。
 

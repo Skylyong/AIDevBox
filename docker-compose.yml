@@ -2,6 +2,8 @@ services:
   dev:
     build: .
     image: python-ai-dev:3.12
+    env_file:
+      - .env
     ports:
       - "22255:22"
     volumes:
@@ -27,7 +29,6 @@ services:
       - "host.docker.internal:host-gateway"
 
     environment:
-      - BAILIAN_API_KEY
       - HTTP_PROXY=http://host.docker.internal:${PROXY_PORT:-7890}
       - HTTPS_PROXY=http://host.docker.internal:${PROXY_PORT:-7890}
       - ALL_PROXY=socks5://host.docker.internal:${PROXY_PORT:-7890}
