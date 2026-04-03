@@ -4,7 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     PYTHONUNBUFFERED=1 \
-    UV_LINK_MODE=copy
+    UV_LINK_MODE=copy \
+    TERM=xterm-256color
 
 # ── System packages ──────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -47,6 +48,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lsb-release \
     sudo \
     && rm -rf /var/lib/apt/lists/*
+
+# ── Ghostty terminfo (so TERM=xterm-ghostty works over SSH / docker exec) ───
+COPY terminfo/78/xterm-ghostty /usr/share/terminfo/x/xterm-ghostty
 
 # ── Node.js 20 LTS (for OpenCode & Codex CLI) ───────────────────────────────
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
