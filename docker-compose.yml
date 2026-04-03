@@ -1,26 +1,39 @@
 services:
   dev:
-    build: .
+    build:
+      context: .
+      args:
+        - HTTP_PROXY=${HTTP_PROXY:-}
+        - HTTPS_PROXY=${HTTPS_PROXY:-}
+        - ALL_PROXY=${ALL_PROXY:-}
     image: python-ai-dev:3.12
     env_file:
       - .env
     ports:
       - "22255:22"
     volumes:
-      # workspace
-      - ~/projects:/workspace
+      # workspace（可配置）
+      - ${PROJECT_DIR:-~/projects}:/workspace
 
-      # SSH public key (mounted as template, entrypoint copies with correct ownership)
-      - ${SSH_AUTHORIZED_KEYS:-/home/ubuntu/.ssh/authorized_keys}:/tmp/authorized_keys:ro
+      # 持久化 dev 用户 home 目录
+      # - ${DEV_HOME_DIR:-~/dev-home}:/home/dev
 
-      # root .profile: SSH login starts in /workspace
+      # 宿主机 AI 工具配置（cc-switch 管理），同时挂载到 root 和 dev，热同步
+      - ~/.claude.json:/root/.claude.json
+      - ~/.claude.json:/home/dev/.claude.json
+      - ~/.claude:/root/.claude
+      - ~/.claude:/home/dev/.claude
+      - ~/.codex:/root/.codex
+      - ~/.codex:/home/dev/.codex
+      - ~/.config/opencode:/root/.config/opencode
+      - ~/.config/opencode:/home/dev/.config/opencode
+
+      # SSH public key（mounted as template, entrypoint copies with correct ownership）
+      - ${SSH_AUTHORIZED_KEYS:-~/.ssh/id_ed25519.pub}:/tmp/authorized_keys:ro
+
+      # .profile: SSH login starts in /workspace
       - ./dotfiles/root-profile:/root/.profile:ro
-
-      # AI tool config templates (from repo, read-only)
-      - ./dotfiles/claudeCode/.claude/settings.json:/tmp/claude-settings.json:ro
-      - ./dotfiles/claudeCode/.claude.json:/tmp/claude.json:ro
-      - ./dotfiles/codex/.codex/config.toml:/tmp/codex-config.toml:ro
-      - ./dotfiles/opencode/opencode.json:/tmp/opencode.json:ro
+      - ./dotfiles/dev-profile:/home/dev/.profile:ro
 
       # Entrypoint script
       - ./entrypoint.sh:/entrypoint.sh:ro
