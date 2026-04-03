@@ -42,6 +42,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     dnsutils \
     openssh-client \
     openssh-server \
+    # sandbox
+    bubblewrap \
     # infrastructure
     ca-certificates \
     gnupg \
@@ -74,7 +76,7 @@ RUN uv pip install --system -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
 # ── AI coding CLI tools ──────────────────────────────────────────────────────
-RUN npm install -g @anthropic-ai/claude-code opencode-ai @openai/codex@0.80.0
+RUN npm install -g @anthropic-ai/claude-code opencode-ai @openai/codex
 
 # ── Users ─────────────────────────────────────────────────────────────────────
 RUN echo 'root:root@123' | chpasswd \
