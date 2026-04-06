@@ -1,3 +1,4 @@
 # SSH login: start in /workspace
 [ -f /etc/profile ] && . /etc/profile
+[ -f ~/.bashrc ] && . ~/.bashrc
 [ -d /workspace ] && cd /workspace

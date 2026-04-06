@@ -33,7 +33,7 @@ services:
 
       # .profile: SSH login starts in /workspace
       - ./dotfiles/root-profile:/root/.profile:ro
-      - ./dotfiles/dev-profile:/home/dev/.profile:ro
+      - ./dotfiles/dev-profile:/home/dev/.bash_profile:ro
 
       # Entrypoint script
       - ./entrypoint.sh:/entrypoint.sh:ro
