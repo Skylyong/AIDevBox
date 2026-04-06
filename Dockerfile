@@ -61,10 +61,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && npm install -g npm@latest
 
 # ── uv – fast Python package manager ─────────────────────────────────────────
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && ln -s /root/.local/bin/uv /usr/local/bin/uv \
-    && ln -s /root/.local/bin/uvx /usr/local/bin/uvx
-ENV PATH="/root/.local/bin:${PATH}"
+RUN curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
 
 # ── pipx ──────────────────────────────────────────────────────────────────────
 RUN pip install --no-cache-dir pipx \
@@ -81,7 +78,11 @@ RUN npm install -g @anthropic-ai/claude-code opencode-ai @openai/codex
 # ── Users ─────────────────────────────────────────────────────────────────────
 RUN echo 'root:root@123' | chpasswd \
     && useradd -m -s /bin/bash dev \
-    && echo 'dev:dev@123' | chpasswd
+    && echo 'dev:dev@123' | chpasswd \
+    && su - dev -c "pipx ensurepath" \
+    && echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/dev/.bashrc \
+    && echo "alias claude-d='claude --dangerously-skip-permissions'" >> /home/dev/.bashrc \
+    && echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' >> /home/dev/.bash_profile
 
 # ── SSH server ─────────────────────────────────────────────────────────────────
 RUN mkdir -p /run/sshd /root/.ssh /home/dev/.ssh \
