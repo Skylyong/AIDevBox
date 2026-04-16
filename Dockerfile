@@ -72,17 +72,21 @@ COPY requirements.txt /tmp/requirements.txt
 RUN uv pip install --system -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
-# ── AI coding CLI tools ──────────────────────────────────────────────────────
-RUN npm install -g @anthropic-ai/claude-code opencode-ai @openai/codex
-
 # ── Users ─────────────────────────────────────────────────────────────────────
 RUN echo 'root:root@123' | chpasswd \
     && useradd -m -s /bin/bash dev \
     && echo 'dev:dev@123' | chpasswd \
     && su - dev -c "pipx ensurepath" \
-    && echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/dev/.bashrc \
+    && echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"' >> /home/dev/.bashrc \
     && echo "alias claude-d='claude --dangerously-skip-permissions'" >> /home/dev/.bashrc \
     && echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' >> /home/dev/.bash_profile
+
+# ── AI coding CLI tools（以 dev 身份安装，无需 root 权限即可 npm install -g）──
+# npm prefix 指向 dev 自有目录，update / install 完全由 dev 用户控制
+RUN su - dev -c " \
+    npm config set prefix '/home/dev/.npm-global' \
+    && npm install -g @anthropic-ai/claude-code opencode-ai @openai/codex \
+    "
 
 # ── SSH server ─────────────────────────────────────────────────────────────────
 RUN mkdir -p /run/sshd /root/.ssh /home/dev/.ssh \

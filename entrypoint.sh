@@ -6,6 +6,16 @@ DEV_HOME="/home/dev"
 # ── 确保 dev home 目录归属正确 ──────────────────────────────────────────────
 chown dev:dev "$DEV_HOME"
 
+# ── 复制 .claude.json 并修正归属（避免 bind mount UID 不匹配导致 Claude Code 无法写入）
+# 宿主机文件以只读方式挂载到 /tmp/claude_host.json，启动时复制为容器内可写副本
+if [ -f /tmp/claude_host.json ]; then
+    cp /tmp/claude_host.json /root/.claude.json
+    chmod 600 /root/.claude.json
+    cp /tmp/claude_host.json "$DEV_HOME/.claude.json"
+    chown dev:dev "$DEV_HOME/.claude.json"
+    chmod 600 "$DEV_HOME/.claude.json"
+fi
+
 # ── Proxy (persist into shell profiles for SSH sessions) ─────────────────────
 [ -n "$HTTP_PROXY" ]  && [ -z "$http_proxy" ]  && http_proxy="$HTTP_PROXY"
 [ -n "$HTTPS_PROXY" ] && [ -z "$https_proxy" ] && https_proxy="$HTTPS_PROXY"

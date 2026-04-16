@@ -19,8 +19,8 @@ services:
       # - ${DEV_HOME_DIR:-~/dev-home}:/home/dev
 
       # 宿主机 AI 工具配置（cc-switch 管理），同时挂载到 root 和 dev，热同步
-      - ~/.claude.json:/root/.claude.json
-      - ~/.claude.json:/home/dev/.claude.json
+      # .claude.json 只读挂载到临时路径，entrypoint 复制并修正归属，避免 UID 不匹配导致写入失败
+      - ~/.claude.json:/tmp/claude_host.json:ro
       - ~/.claude:/root/.claude
       - ~/.claude:/home/dev/.claude
       - ~/.codex:/root/.codex
