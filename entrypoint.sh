@@ -58,7 +58,8 @@ if command -v sshd >/dev/null 2>&1 && [ -f /tmp/authorized_keys ]; then
     chmod 600 "$DEV_HOME/.ssh/authorized_keys"
     chown -R dev:dev "$DEV_HOME/.ssh"
 
-    /usr/sbin/sshd
+    SSHD_PORT="${SSHD_PORT:-22}"
+    /usr/sbin/sshd -p "$SSHD_PORT"
 fi
 
 # Keep container alive when no foreground command is given

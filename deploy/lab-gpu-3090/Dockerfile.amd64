@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm
+FROM docker.m.daocloud.io/library/python:3.12-slim-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -78,7 +78,6 @@ RUN echo 'root:root@123' | chpasswd \
     && echo 'dev:dev@123' | chpasswd \
     && su - dev -c "pipx ensurepath" \
     && echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"' >> /home/dev/.bashrc \
-    && echo "alias codex-d='codex --dangerously-bypass-approvals-and-sandbox'" >> /home/dev/.bashrc \
     && echo "alias claude-d='claude --dangerously-skip-permissions'" >> /home/dev/.bashrc \
     && echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' >> /home/dev/.bash_profile
 

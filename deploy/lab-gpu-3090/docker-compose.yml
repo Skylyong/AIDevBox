@@ -1,0 +1,49 @@
+services:
+  dev:
+    image: docker-server.tcm403.site/aidevbox:rip-aligner-amd64
+    container_name: aidevbox-rip-aligner-dev
+    env_file:
+      - .env
+    ports:
+      - "${SSH_PORT:-22255}:22"
+    volumes:
+      - ${PROJECT_DIR}:/workspace
+
+      - ${HOSTFILES_DIR}/claude/.claude.json:/tmp/claude_host.json:ro
+      - ${HOSTFILES_DIR}/claude/.claude:/root/.claude
+      - ${HOSTFILES_DIR}/claude/.claude:/home/dev/.claude
+      - ${HOSTFILES_DIR}/codex/.codex:/root/.codex
+      - ${HOSTFILES_DIR}/codex/.codex:/home/dev/.codex
+      - ${HOSTFILES_DIR}/opencode:/root/.config/opencode
+      - ${HOSTFILES_DIR}/opencode:/home/dev/.config/opencode
+
+      - ${SSH_AUTHORIZED_KEYS}:/tmp/authorized_keys:ro
+
+      - ./dotfiles/root-profile:/root/.profile:ro
+      - ./dotfiles/dev-profile:/home/dev/.bash_profile:ro
+      - ./entrypoint.sh:/entrypoint.sh:ro
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    environment:
+      - SSHD_PORT=${SSHD_PORT:-22}
+      - HTTP_PROXY=http://172.28.0.1:7898
+      - HTTPS_PROXY=http://172.28.0.1:7898
+      - ALL_PROXY=
+      - NO_PROXY=localhost,127.0.0.1,::1,host.docker.internal
+      - http_proxy=http://172.28.0.1:7898
+      - https_proxy=http://172.28.0.1:7898
+      - all_proxy=
+      - no_proxy=localhost,127.0.0.1,::1,host.docker.internal
+
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    working_dir: /workspace
+    restart: unless-stopped
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
