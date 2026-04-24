@@ -44,6 +44,14 @@ PROXYEOF
     su - dev -c "git config --global https.proxy '$HTTPS_PROXY'" 2>/dev/null || true
 fi
 
+# ── SSH agent forwarding ─────────────────────────────────────────────────────
+if [ -S "${SSH_AUTH_SOCK:-}" ]; then
+    cat > /etc/profile.d/ssh-agent.sh <<SSHEOF
+export SSH_AUTH_SOCK="${SSH_AUTH_SOCK}"
+SSHEOF
+    chmod 644 /etc/profile.d/ssh-agent.sh
+fi
+
 # ── SSH server ────────────────────────────────────────────────────────────────
 if command -v sshd >/dev/null 2>&1 && [ -f /tmp/authorized_keys ]; then
     mkdir -p /root/.ssh

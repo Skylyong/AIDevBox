@@ -55,7 +55,29 @@ Edit `.env` with your settings:
 |----------|-------------|
 | `PROJECT_DIR` | Host project directory, mounted as `/workspace`. Default: `~/projects` |
 | `SSH_AUTHORIZED_KEYS` | **Absolute path** to your `.pub` key file. Use ed25519 or RSA |
+| `SSH_AGENT_SOCKET` | Optional `ssh-agent` socket visible to Docker. Leave unset on macOS Docker Desktop; set explicitly for Colima/Linux |
 | `HTTP_PROXY` / `HTTPS_PROXY` / `ALL_PROXY` | Optional proxy. Leave empty for direct connection |
+
+Before starting the container, make sure your key is loaded in the host agent:
+
+```bash
+ssh-add -l || ssh-add ~/.ssh/id_ed25519
+```
+
+For Colima, enable agent forwarding into the Colima VM first, then persist the VM-visible socket in `.env`:
+
+```bash
+colima stop
+sed -i.bak 's/forwardAgent: false/forwardAgent: true/' ~/.colima/default/colima.yaml
+colima start
+echo "SSH_AGENT_SOCKET=$(colima ssh -- printenv SSH_AUTH_SOCK)" >> .env
+```
+
+For a native Linux Docker engine, persist the host socket in `.env`:
+
+```bash
+echo "SSH_AGENT_SOCKET=$SSH_AUTH_SOCK" >> .env
+```
 
 ### 4. Start
 
@@ -96,6 +118,7 @@ Once inside, `claude`, `opencode`, and `codex` are ready to use — no additiona
 | `~/.codex/` | `/root/.codex/`, `/home/dev/.codex/` | Codex config (cc-switch managed) |
 | `~/.config/opencode/` | `/root/.config/opencode/`, `/home/dev/.config/opencode/` | OpenCode config (cc-switch managed) |
 | `${PROJECT_DIR}` | `/workspace/` | Your project files |
+| `${SSH_AGENT_SOCKET:-/run/host-services/ssh-auth.sock}` | `/ssh-agent` | Host ssh-agent socket for Git/SSH signing inside the container |
 
 ## Pre-installed
 

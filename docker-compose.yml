@@ -31,6 +31,15 @@ services:
       # SSH public key（mounted as template, entrypoint copies with correct ownership）
       - ${SSH_AUTHORIZED_KEYS:-~/.ssh/id_ed25519.pub}:/tmp/authorized_keys:ro
 
+      # Host ssh-agent socket (private keys stay on the host)
+      # Docker Desktop exposes the host agent at /run/host-services/ssh-auth.sock.
+      # On Colima/Linux, set SSH_AGENT_SOCKET to a socket path visible to the Docker daemon.
+      - type: bind
+        source: ${SSH_AGENT_SOCKET:-/run/host-services/ssh-auth.sock}
+        target: /ssh-agent
+        bind:
+          create_host_path: false
+
       # .profile: SSH login starts in /workspace
       - ./dotfiles/root-profile:/root/.profile:ro
       - ./dotfiles/dev-profile:/home/dev/.bash_profile:ro
@@ -51,6 +60,7 @@ services:
       - https_proxy=${https_proxy:-}
       - all_proxy=${all_proxy:-}
       - no_proxy=${no_proxy:-localhost,127.0.0.1,host.docker.internal}
+      - SSH_AUTH_SOCK=/ssh-agent
 
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
     working_dir: /workspace
